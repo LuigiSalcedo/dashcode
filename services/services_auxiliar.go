@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"net/http"
 )
 
@@ -10,14 +9,6 @@ type Error struct {
 	Code int    `json:"code"`
 	Err  string `json:"error"`
 }
-
-// Possibles service error
-var (
-	ErrNotFound   = errors.New("resource not found")
-	ErrInternal   = errors.New("internal server error")
-	ErrJson       = errors.New("JSON format is not valid")
-	ErrBadRequest = errors.New("request is not valid")
-)
 
 // Errors to send as reponse
 var (
@@ -38,6 +29,11 @@ var (
 
 	ErrorBadRequest = &Error{
 		Code: http.StatusBadRequest,
-		Err:  "request is no valid",
+		Err:  "request is not valid",
+	}
+
+	ErrorJWT = &Error{
+		Code: http.StatusForbidden,
+		Err:  "JWT expired or not valid",
 	}
 )
