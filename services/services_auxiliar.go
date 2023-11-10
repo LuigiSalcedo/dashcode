@@ -32,8 +32,18 @@ var (
 		Err:  "request is not valid",
 	}
 
+	ErrorUnauthorized = &Error{
+		Code: http.StatusUnauthorized,
+		Err:  "the access to this resource is unauthorized",
+	}
+
 	ErrorJWT = &Error{
 		Code: http.StatusForbidden,
 		Err:  "JWT expired or not valid",
+	}
+
+	ErrorPathParam = &Error{
+		Code: http.StatusBadRequest,
+		Err:  "path parameter is not valid",
 	}
 )

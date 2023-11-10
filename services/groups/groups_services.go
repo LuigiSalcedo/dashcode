@@ -1,11 +1,11 @@
 package groups
 
 import (
+	"dashcode/models"
 	"dashcode/repositories/groupsrepo"
 	"dashcode/services"
 )
 
-// Services to create a group
 func CreateGroup(idCreator int64, name, description string) *services.Error {
 	err := groupsrepo.CreateGroup(idCreator, name, description)
 
@@ -14,4 +14,18 @@ func CreateGroup(idCreator int64, name, description string) *services.Error {
 	}
 
 	return nil
+}
+
+func FetchGroupsByOwner(idCreator int64) ([]models.Group, *services.Error) {
+	group, err := groupsrepo.FetchByOwner(idCreator)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	if group == nil {
+		return nil, services.ErrorNotFound
+	}
+
+	return group, nil
 }

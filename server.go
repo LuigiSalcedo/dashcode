@@ -13,6 +13,7 @@ func main() {
 	e.GET("/login", controllers.Login)
 	e.POST("/register", controllers.SaveUser)
 	e.POST("/groups", controllers.CreateGroup)
+	e.GET("/groups/:id/owner", controllers.FetchGroupsByOwner)
 
 	log.Fatal(e.Start(":8080"))
 }
