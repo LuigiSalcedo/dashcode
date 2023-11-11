@@ -14,6 +14,7 @@ func main() {
 	e.POST("/register", controllers.SaveUser)
 	e.POST("/groups", controllers.CreateGroup)
 	e.GET("/groups/:id/owner", controllers.FetchGroupsByOwner)
+	e.GET("/groups/:id/member", controllers.FetchGroupsByMember)
 
 	log.Fatal(e.Start(":8080"))
 }

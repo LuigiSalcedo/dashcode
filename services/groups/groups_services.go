@@ -29,3 +29,17 @@ func FetchGroupsByOwner(idCreator int64) ([]models.Group, *services.Error) {
 
 	return group, nil
 }
+
+func FetchByMember(idMember int64) ([]models.Group, *services.Error) {
+	groups, err := groupsrepo.FetchByMember(idMember)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	if groups == nil {
+		return nil, services.ErrorNotFound
+	}
+
+	return groups, nil
+}

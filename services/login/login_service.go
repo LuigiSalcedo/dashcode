@@ -4,7 +4,6 @@ import (
 	"dashcode/general"
 	"dashcode/repositories/loginrepo"
 	"dashcode/services"
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -20,7 +19,6 @@ func Login(email, pwd string) (int64, *services.Error) {
 	}
 
 	if id == -1 {
-		log.Println("Hey whatsup?")
 		return -1, services.ErrorNotFound
 	}
 

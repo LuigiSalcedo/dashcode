@@ -57,6 +57,10 @@ func FetchGroupsByOwner(c echo.Context) error {
 
 	id, err := security.IDFromJWT(jwt)
 
+	if err != nil {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
 	idParam := c.Param("id")
 
 	idParamValue, err := strconv.Atoi(idParam)
@@ -74,6 +78,41 @@ func FetchGroupsByOwner(c echo.Context) error {
 	}
 
 	g, srvErr := groups.FetchGroupsByOwner(id)
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	return c.JSON(http.StatusOK, g)
+}
+
+// Get groups where the user with the id is a member
+func FetchGroupsByMember(c echo.Context) error {
+	jwt := c.Request().Header.Get("Authorization")
+
+	if len(jwt) == 0 {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
+	id, err := security.IDFromJWT(jwt)
+
+	if err != nil {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
+	idParam := c.Param("id")
+
+	idValue, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
+	}
+
+	if int64(idValue) != id {
+		return c.JSON(services.ErrorUnauthorized.Code, services.ErrorUnauthorized)
+	}
+
+	g, srvErr := groups.FetchByMember(id)
 
 	if srvErr != nil {
 		return c.JSON(srvErr.Code, srvErr)

@@ -9,13 +9,19 @@ import (
 )
 
 const (
-	saveSQL         = "INSERT INTO GROUPS(id_creator, name, description) VALUES (?, ?, ?)"
-	fetchByOwnerSQL = "SELECT ID, ID_CREATOR, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
+	saveSQL          = "INSERT INTO GROUPS(id_creator, name, description) VALUES (?, ?, ?)"
+	fetchByOwnerSQL  = "SELECT ID, ID_CREATOR, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
+	fetchByMemberSQL = `
+	SELECT G.ID, G.ID_CREATOR, G.NAME, G.DESCRIPTION
+	FROM GROUPS as G JOIN GROUP_MEMBERS as GM ON GM.ID_GROUP = G.ID
+	WHERE GM.ID_USER = ?
+	`
 )
 
 var (
-	saveStmt         *sql.Stmt
-	fetchByOwnerStmt *sql.Stmt
+	saveStmt          *sql.Stmt
+	fetchByOwnerStmt  *sql.Stmt
+	fetchByMemberStmt *sql.Stmt
 )
 
 func init() {
@@ -31,6 +37,10 @@ func init() {
 
 	stmt, err = database.DB().Prepare(fetchByOwnerSQL)
 	fetchByOwnerStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchByMemberSQL)
+	fetchByMemberStmt = stmt
 	check(err)
 }
 
@@ -72,4 +82,33 @@ func FetchByOwner(idCreator int64) ([]models.Group, error) {
 	}
 
 	return result, nil
+}
+
+func FetchByMember(idMember int64) ([]models.Group, error) {
+	r, err := fetchByMemberStmt.Query(idMember)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return nil, err
+	}
+
+	groups := make([]models.Group, 0, 15)
+
+	for r.Next() {
+		g := models.Group{}
+		err = r.Scan(&g.Id, &g.IdCreator, &g.Name, &g.Description)
+
+		if err != nil {
+			general.PotencialInternalError(err)
+			return nil, err
+		}
+
+		groups = append(groups, g)
+	}
+
+	if len(groups) == 0 {
+		return nil, nil
+	}
+
+	return groups, nil
 }
