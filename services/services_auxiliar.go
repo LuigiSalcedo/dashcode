@@ -10,6 +10,13 @@ type Error struct {
 	Err  string `json:"error"`
 }
 
+// Special response structure
+type SpecialResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    any    `json:"data"`
+}
+
 // Errors to send as reponse
 var (
 	ErrorNotFound = &Error{
@@ -45,5 +52,10 @@ var (
 	ErrorPathParam = &Error{
 		Code: http.StatusBadRequest,
 		Err:  "path parameter is not valid",
+	}
+
+	ErrorForbidden = &Error{
+		Code: http.StatusForbidden,
+		Err:  "forbidden action",
 	}
 )

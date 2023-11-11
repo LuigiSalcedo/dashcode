@@ -7,6 +7,7 @@ import (
 	"dashcode/services/groups"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -94,4 +95,48 @@ func FetchGroupsByMember(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, g)
+}
+
+// Send invitation
+func SendInvitations(c echo.Context) error {
+	jwt := c.Request().Header.Get("Authorization")
+
+	if len(jwt) == 0 {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
+	id, err := security.IDFromJWT(jwt)
+
+	if err != nil {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
+	idGroupParam := c.Param("groupId")
+
+	idGroupValue, err := strconv.Atoi(idGroupParam)
+
+	if err != nil {
+		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
+	}
+
+	inv := models.Invitation{}
+	err = json.NewDecoder(c.Request().Body).Decode(&inv)
+
+	if err != nil {
+		return c.JSON(services.ErrorJson.Code, services.ErrorJson)
+	}
+
+	inv.IdGroup = int64(idGroupValue)
+
+	srvRes, srvErr := groups.Invite(id, inv)
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	if srvRes != nil {
+		return c.JSON(srvRes.Code, srvRes)
+	}
+
+	return c.NoContent(http.StatusCreated)
 }

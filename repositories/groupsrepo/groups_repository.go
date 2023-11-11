@@ -5,23 +5,30 @@ import (
 	"dashcode/general"
 	"dashcode/models"
 	"dashcode/repositories"
+	"dashcode/repositories/loginrepo"
 	"database/sql"
 )
 
 const (
-	saveSQL          = "INSERT INTO GROUPS(id_creator, name, description) VALUES (?, ?, ?)"
-	fetchByOwnerSQL  = "SELECT ID, ID_CREATOR, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
-	fetchByMemberSQL = `
+	saveSQL           = "INSERT INTO GROUPS(id_creator, name, description) VALUES (?, ?, ?)"
+	saveInvitationSQL = "INSERT INTO INVITATIONS(id_user, id_group) VALUES(?, ?)"
+	fetchByOwnerSQL   = "SELECT ID, ID_CREATOR, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
+	fetchByMemberSQL  = `
 	SELECT G.ID, G.ID_CREATOR, G.NAME, G.DESCRIPTION
 	FROM GROUPS as G JOIN GROUP_MEMBERS as GM ON GM.ID_GROUP = G.ID
 	WHERE GM.ID_USER = ?
 	`
+	fetchOwnerSQL       = "SELECT ID_CREATOR FROM GROUPS WHERE ID = ? LIMIT 1"
+	fetchInvitationsSQL = "SELECT STATE FROM INVITATIONS WHERE ID_USER = ? AND ID_GROUP = ?"
 )
 
 var (
-	saveStmt          *sql.Stmt
-	fetchByOwnerStmt  *sql.Stmt
-	fetchByMemberStmt *sql.Stmt
+	saveStmt             *sql.Stmt
+	saveInvitationStmt   *sql.Stmt
+	fetchByOwnerStmt     *sql.Stmt
+	fetchByMemberStmt    *sql.Stmt
+	fetchOwnerStmt       *sql.Stmt
+	fetchInvitationsStmt *sql.Stmt
 )
 
 func init() {
@@ -35,12 +42,24 @@ func init() {
 	saveStmt = stmt
 	check(err)
 
+	stmt, err = database.DB().Prepare(saveInvitationSQL)
+	saveInvitationStmt = stmt
+	check(err)
+
 	stmt, err = database.DB().Prepare(fetchByOwnerSQL)
 	fetchByOwnerStmt = stmt
 	check(err)
 
 	stmt, err = database.DB().Prepare(fetchByMemberSQL)
 	fetchByMemberStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchOwnerSQL)
+	fetchOwnerStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchInvitationsSQL)
+	fetchInvitationsStmt = stmt
 	check(err)
 }
 
@@ -111,4 +130,68 @@ func FetchByMember(idMember int64) ([]models.Group, error) {
 	}
 
 	return groups, nil
+}
+
+func FetchOwner(idGroup int64) (int64, error) {
+	r, err := fetchOwnerStmt.Query(idGroup)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return -1, err
+	}
+
+	if !r.Next() {
+		return -1, nil
+	}
+
+	var idCreator int64
+
+	err = r.Scan(&idCreator)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return idCreator, nil
+}
+
+func FetchCurrentInvitation(email string, idGroup int64) (int64, *sql.NullBool, error) {
+	idUser, _, err := loginrepo.FetchLogin(email)
+
+	if idUser == -1 {
+		return -1, nil, err
+	}
+
+	r, err := fetchInvitationsStmt.Query(idUser, idGroup)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return -1, nil, err
+	}
+
+	state := sql.NullBool{}
+
+	if !r.Next() {
+		return idUser, nil, nil
+	}
+
+	err = r.Scan(&state)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return -1, nil, err
+	}
+
+	return idUser, &state, nil
+}
+
+func SendInvitation(idUser, idGroup int64) error {
+	_, err := saveInvitationStmt.Exec(idUser, idGroup)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return err
+	}
+
+	return nil
 }

@@ -15,6 +15,7 @@ func main() {
 	e.POST("/groups", controllers.CreateGroup)
 	e.GET("/groups/owner", controllers.FetchGroupsByOwner)
 	e.GET("/groups/member", controllers.FetchGroupsByMember)
+	e.POST("/groups/invite/:groupId", controllers.SendInvitations)
 
 	log.Fatal(e.Start(":8080"))
 }

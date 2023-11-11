@@ -12,3 +12,9 @@ type Group struct {
 	Id int64 `json:"id"`
 	CreateGroup
 }
+
+// Invitation Structure
+type Invitation struct {
+	IdGroup int64    `json:"id"`
+	Emails  []string `json:"emails"`
+}
