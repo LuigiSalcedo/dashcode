@@ -7,7 +7,6 @@ import (
 	"dashcode/services/groups"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -61,18 +60,6 @@ func FetchGroupsByOwner(c echo.Context) error {
 		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
 	}
 
-	idParam := c.Param("id")
-
-	idParamValue, err := strconv.Atoi(idParam)
-
-	if err != nil {
-		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
-	}
-
-	if int64(idParamValue) != id {
-		return c.JSON(services.ErrorUnauthorized.Code, services.ErrorUnauthorized)
-	}
-
 	if err != nil {
 		return c.JSON(services.ErrorJson.Code, services.ErrorJson)
 	}
@@ -98,18 +85,6 @@ func FetchGroupsByMember(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
-	}
-
-	idParam := c.Param("id")
-
-	idValue, err := strconv.Atoi(idParam)
-
-	if err != nil {
-		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
-	}
-
-	if int64(idValue) != id {
-		return c.JSON(services.ErrorUnauthorized.Code, services.ErrorUnauthorized)
 	}
 
 	g, srvErr := groups.FetchByMember(id)
