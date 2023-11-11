@@ -34,3 +34,4 @@ This is the list of endpoints of the server:
 | /register | POST | JSON | id: int, name: string, email: string, password: string | JSON | error message or null with 201 status code |
 | /groups | POST | JSON | Authorization (Header): JWT (without "Bearer" prefix), name: string, description: string | no content | 201 status code if the group was created |
 | /groups/:id/owner | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of groups where the user with **:id** id is the owner |
+| /groups/:id/member | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | list of groups where the user with **:id** id is a member |
