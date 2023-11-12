@@ -6,13 +6,13 @@ Backend. Dashcode is a project to manage code and programming tasks.
 - Go (Golang) compiler.
 
 ## Configurations
-- Compile the file **server.go** using
+### Compile the file **server.go** using
 ```
 go build server.go
 ```
 This will create an executable file.
 
-- Load database schema
+### Load database schema
 
 on schema folder you will found a file named "schema.sql". Load it on your database manager
 and execute it to create the database schema.
