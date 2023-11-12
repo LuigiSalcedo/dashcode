@@ -36,4 +36,5 @@ This is the list of endpoints of the server:
 | /groups/owner | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of groups where the user with **:id** id is the owner |
 | /groups/member | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | list of groups where the user with **:id** id is a member |
 | /groups/invite/:groupId | POST | JSON | Authorization (Header): JWT (without "Bearer prefix"), emails: list of users to invite emails | JSON | Nothing (201), Problem description (200), Error Message (400, 401, 405) |
-| /invitations | GET | no content | Authorization (Header): JWT (witout "Bearer" prefix) | JSON | list of invitations pending |
+| /invitations | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of invitations pending |
+| `/invitations/state/:groupId?[state=(accepted | rejected | any)]` | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | sent invitations list from group with the **groupId** id |

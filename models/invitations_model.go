@@ -7,3 +7,10 @@ type InvitationData struct {
 	GroupDescription string `json:"description_group"`
 	CreatorName      string `json:"creator_name"`
 }
+
+type SentInvitationsData struct {
+	Id        int64  `json:"id"`
+	UserName  string `json:"user_name"`
+	UserEmail string `json:"user_email"`
+	State     string `json:"state"`
+}
