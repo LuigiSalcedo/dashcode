@@ -30,11 +30,11 @@ If nothing went wrong the server should start on http://localhost:8080.
 This is the list of endpoints of the server:
 | Path | Method | Request format | Request description | Response format | Response description |
 --------|-------|----------------|---------------------|-----------------|--------------------------
-| /login | GET | JSON | email: string, password: string |JSON | JWT to access to others endpoint or error message |
-| /register | POST | JSON | id: int, name: string, email: string, password: string | JSON | error message or null with 201 status code |
-| /groups | POST | JSON | Authorization (Header): JWT (without "Bearer" prefix), name: string, description: string | no content | 201 status code if the group was created |
-| /groups/owner | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of groups where the user with **:id** id is the owner |
-| /groups/member | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | list of groups where the user with **:id** id is a member |
-| /groups/invite/:groupId | POST | JSON | Authorization (Header): JWT (without "Bearer prefix"), emails: list of users to invite emails | JSON | Nothing (201), Problem description (200), Error Message (400, 401, 405) |
-| /invitations | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of invitations pending |
-| `/invitations/state/:groupId?[state=(accepted | rejected | any)]` | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | sent invitations list from group with the **groupId** id |
+| `/login` | GET | JSON | email: string, password: string |JSON | JWT to access to others endpoint or error message |
+| `/register` | POST | JSON | id: int, name: string, email: string, password: string | JSON | error message or null with 201 status code |
+| `/groups` | POST | JSON | Authorization (Header): JWT (without "Bearer" prefix), name: string, description: string | no content | 201 status code if the group was created |
+| `/groups/owner` | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of groups where the user with **:id** id is the owner |
+| `/groups/member` | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | list of groups where the user with **:id** id is a member |
+| `/groups/invite/:groupId` | POST | JSON | Authorization (Header): JWT (without "Bearer prefix"), emails: list of users to invite emails | JSON | Nothing (201), Problem description (200), Error Message (400, 401, 405) |
+| `/invitations` | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of invitations pending |
+| `/invitations/group/:groupId?[state=(accepted or rejected or any)]` | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | sent invitations list from group with the **groupId** id |
