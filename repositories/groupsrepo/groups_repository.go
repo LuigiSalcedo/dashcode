@@ -12,9 +12,9 @@ import (
 const (
 	saveSQL           = "INSERT INTO GROUPS(id_creator, name, description) VALUES (?, ?, ?)"
 	saveInvitationSQL = "INSERT INTO INVITATIONS(id_user, id_group) VALUES(?, ?)"
-	fetchByOwnerSQL   = "SELECT ID, ID_CREATOR, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
+	fetchByOwnerSQL   = "SELECT ID, NAME, DESCRIPTION FROM GROUPS WHERE ID_CREATOR = ?"
 	fetchByMemberSQL  = `
-	SELECT G.ID, G.ID_CREATOR, G.NAME, G.DESCRIPTION
+	SELECT G.ID, G.NAME, G.DESCRIPTION
 	FROM GROUPS as G JOIN GROUP_MEMBERS as GM ON GM.ID_GROUP = G.ID
 	WHERE GM.ID_USER = ?
 	`
@@ -101,7 +101,7 @@ func FetchByOwner(idCreator int64) ([]models.Group, error) {
 
 	for r.Next() {
 		g := models.Group{}
-		err = r.Scan(&g.Id, &g.IdCreator, &g.Name, &g.Description)
+		err = r.Scan(&g.Id, &g.Name, &g.Description)
 		result = append(result, g)
 
 		if err != nil {
@@ -129,7 +129,7 @@ func FetchByMember(idMember int64) ([]models.Group, error) {
 
 	for r.Next() {
 		g := models.Group{}
-		err = r.Scan(&g.Id, &g.IdCreator, &g.Name, &g.Description)
+		err = r.Scan(&g.Id, &g.Name, &g.Description)
 
 		if err != nil {
 			general.PotencialInternalError(err)
