@@ -75,3 +75,13 @@ func FetchInvitationsWithState(ownerId, groupId int64, state *InvitationState) (
 
 	return invs, nil
 }
+
+func FetchUserInvitations(userId int64) ([]models.UserInvitationData, *services.Error) {
+	r, err := invitationsrepo.FetchUserInvitations(userId)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	return r, nil
+}

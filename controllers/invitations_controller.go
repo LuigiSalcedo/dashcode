@@ -70,3 +70,21 @@ func FetchInvitationsByGroup(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, invs)
 }
+
+func FetchUserInvitations(c echo.Context) error {
+	jwt := c.Request().Header.Get("Authorization")
+
+	id, err := security.IDFromJWT(jwt)
+
+	if err != nil {
+		return c.JSON(services.ErrorJson.Code, services.ErrorJson)
+	}
+
+	invs, srvErr := invitations.FetchUserInvitations(id)
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	return c.JSON(http.StatusOK, invs)
+}

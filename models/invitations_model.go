@@ -14,3 +14,10 @@ type SentInvitationsData struct {
 	UserEmail string `json:"user_email"`
 	State     string `json:"state"`
 }
+
+type UserInvitationData struct {
+	Id               int64  `json:"id"`
+	GroupId          int64  `json:"group_id"`
+	GroupName        string `json:"group_name"`
+	GroupDescription string `json:"group_description"`
+}

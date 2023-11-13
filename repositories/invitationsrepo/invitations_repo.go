@@ -49,6 +49,19 @@ const (
 	JOIN LOGIN as L ON L.ID = U.ID
 	WHERE G.ID = ? AND STATE IS NULL
 	`
+
+	fetchUserInvitationsSQL = `
+	SELECT 
+	I.ID,
+	G.ID,
+	G.NAME,
+	G.DESCRIPTION
+	FROM
+	INVITATIONS as I
+	JOIN GROUPS as G ON I.ID_GROUP = G.ID
+	JOIN USERS as U ON I.ID_USER = U.ID
+	WHERE U.ID = ? AND I.STATE IS NULL
+	`
 )
 
 var (
@@ -56,6 +69,7 @@ var (
 	fetchAllByGroupIdStmt     *sql.Stmt
 	fetchWithStateByGroupStmt *sql.Stmt
 	fetchNullByGroupStmt      *sql.Stmt
+	fetchUserInvitationsStmt  *sql.Stmt
 )
 
 func init() {
@@ -79,6 +93,10 @@ func init() {
 
 	stmt, err = database.DB().Prepare(fetchNullByGroupSQL)
 	fetchNullByGroupStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchUserInvitationsSQL)
+	fetchUserInvitationsStmt = stmt
 	check(err)
 
 }
@@ -157,4 +175,30 @@ func FetchWithStateByGroup(groupId int64, state bool) ([]models.SentInvitationsD
 
 func FetchNullByGroup(groupId int64) ([]models.SentInvitationsData, error) {
 	return fetchByGroup(fetchNullByGroupStmt, groupId)
+}
+
+func FetchUserInvitations(userId int64) ([]models.UserInvitationData, error) {
+	r, err := fetchUserInvitationsStmt.Query(userId)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return nil, err
+	}
+
+	invs := make([]models.UserInvitationData, 0, 15)
+
+	for r.Next() {
+		inv := models.UserInvitationData{}
+
+		err = r.Scan(&inv.Id, &inv.GroupId, &inv.GroupName, &inv.GroupDescription)
+
+		if err != nil {
+			general.PotencialInternalError(err)
+			return nil, err
+		}
+
+		invs = append(invs, inv)
+	}
+
+	return invs, nil
 }
