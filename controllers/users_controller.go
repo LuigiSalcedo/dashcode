@@ -16,7 +16,7 @@ func SaveUser(c echo.Context) error {
 
 	err := json.NewDecoder(c.Request().Body).Decode(&u)
 
-	if err != nil || u.Id <= 0 {
+	if err != nil || u.Id <= 0 || len(u.Name) < 3 || len(u.Password) < 8 {
 		return c.JSON(http.StatusBadRequest, services.ErrorBadRequest)
 	}
 
