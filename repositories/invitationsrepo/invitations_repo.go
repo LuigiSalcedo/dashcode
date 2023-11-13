@@ -62,6 +62,23 @@ const (
 	JOIN USERS as U ON I.ID_USER = U.ID
 	WHERE U.ID = ? AND I.STATE IS NULL
 	`
+
+	fetchInvitadedSQL = `
+	SELECT
+	ID_USER, ID_GROUP, STATE
+	FROM INVITATIONS
+	WHERE ID = ? LIMIT 1
+	`
+
+	updateStateSQL = `
+	UPDATE INVITATIONS SET STATE = ? WHERE ID = ?
+	`
+
+	saveGroupMemberSQL = `
+	INSERT INTO
+	GROUP_MEMBERS (id_group, id_user)
+	VALUES (?, ?)
+	`
 )
 
 var (
@@ -70,6 +87,9 @@ var (
 	fetchWithStateByGroupStmt *sql.Stmt
 	fetchNullByGroupStmt      *sql.Stmt
 	fetchUserInvitationsStmt  *sql.Stmt
+	fetchInvitatedStmt        *sql.Stmt
+	updateStateStmt           *sql.Stmt
+	saveGroupMemberStmt       *sql.Stmt
 )
 
 func init() {
@@ -97,6 +117,18 @@ func init() {
 
 	stmt, err = database.DB().Prepare(fetchUserInvitationsSQL)
 	fetchUserInvitationsStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchInvitadedSQL)
+	fetchInvitatedStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(updateStateSQL)
+	updateStateStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(saveGroupMemberSQL)
+	saveGroupMemberStmt = stmt
 	check(err)
 
 }
@@ -201,4 +233,56 @@ func FetchUserInvitations(userId int64) ([]models.UserInvitationData, error) {
 	}
 
 	return invs, nil
+}
+
+func FetchInvitation(invitationId int64) (int64, int64, bool, error) {
+	r, err := fetchInvitatedStmt.Query(invitationId)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return -1, -1, false, err
+	}
+
+	var userId int64
+	var groupId int64
+	nullableState := sql.NullBool{}
+
+	if !r.Next() {
+		return -1, -1, false, nil
+	}
+
+	err = r.Scan(&userId, &groupId, &nullableState)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return -1, -1, false, nil
+	}
+
+	responded := nullableState.Valid
+
+	return userId, groupId, responded, nil
+}
+
+func UpdateState(tx *sql.Tx, state bool, invitationId int64) error {
+	stmt := tx.Stmt(updateStateStmt)
+
+	_, err := stmt.Exec(state, invitationId)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+	}
+
+	return err
+}
+
+func SaveGroupMember(tx *sql.Tx, groupId, userId int64) error {
+	stmt := tx.Stmt(saveGroupMemberStmt)
+
+	_, err := stmt.Exec(groupId, userId)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+	}
+
+	return err
 }

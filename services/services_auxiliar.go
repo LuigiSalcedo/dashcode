@@ -59,3 +59,11 @@ var (
 		Err:  "forbidden action",
 	}
 )
+
+// Function to create a QueryParam error
+func NewErrorQueryParam(queryParam string) (int, *Error) {
+	return http.StatusBadRequest, &Error{
+		Code: http.StatusBadRequest,
+		Err:  "query param '" + queryParam + "' is not found or not valid",
+	}
+}

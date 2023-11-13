@@ -19,6 +19,7 @@ func main() {
 	e.GET("/invitations", controllers.FetchInvitations)
 	e.GET("/invitations/group/:groupId", controllers.FetchInvitationsByGroup)
 	e.GET("/invitations/me", controllers.FetchUserInvitations)
+	e.POST("/invitations/respond/:invitationId", controllers.RespondInvitation)
 
 	log.Fatal(e.Start(":8080"))
 }

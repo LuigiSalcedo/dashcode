@@ -1,10 +1,13 @@
 package invitations
 
 import (
+	"dashcode/database"
+	"dashcode/general"
 	"dashcode/models"
 	"dashcode/repositories/groupsrepo"
 	"dashcode/repositories/invitationsrepo"
 	"dashcode/services"
+	"net/http"
 )
 
 type InvitationState struct {
@@ -14,6 +17,14 @@ type InvitationState struct {
 var (
 	Accepted = &InvitationState{State: true}
 	Rejected = &InvitationState{State: false}
+)
+
+// Special responses
+var (
+	AlreadyResponded = &services.SpecialResponse{
+		Code:    http.StatusBadRequest,
+		Message: "invitations already responded",
+	}
 )
 
 func FetchInvitations(id int64) ([]models.InvitationData, *services.Error) {
@@ -84,4 +95,49 @@ func FetchUserInvitations(userId int64) ([]models.UserInvitationData, *services.
 	}
 
 	return r, nil
+}
+
+func RespondInvitation(userId, invitationId int64, response bool) (*services.SpecialResponse, *services.Error) {
+	id, groupId, responded, err := invitationsrepo.FetchInvitation(invitationId)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	if id != userId {
+		return nil, services.ErrorForbidden
+	}
+
+	if responded {
+		return AlreadyResponded, nil
+	}
+
+	tx, err := database.Begin()
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return nil, services.ErrorInternal
+	}
+
+	err = invitationsrepo.UpdateState(tx, response, invitationId)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, services.ErrorInternal
+	}
+
+	if !response {
+		tx.Commit()
+		return nil, nil
+	}
+
+	err = invitationsrepo.SaveGroupMember(tx, groupId, userId)
+
+	if err != nil {
+		tx.Rollback()
+		return nil, services.ErrorInternal
+	}
+
+	tx.Commit()
+	return nil, nil
 }

@@ -88,3 +88,45 @@ func FetchUserInvitations(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, invs)
 }
+
+func RespondInvitation(c echo.Context) error {
+	jwt := c.Request().Header.Get("Authorization")
+
+	userId, err := security.IDFromJWT(jwt)
+
+	if err != nil {
+		return c.JSON(services.ErrorJWT.Code, services.ErrorJWT)
+	}
+
+	inivitationIdParam := c.Param("invitationId")
+
+	invitationId, err := strconv.Atoi(inivitationIdParam)
+
+	if err != nil {
+		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
+	}
+
+	stateParam := c.QueryParam("state")
+
+	state := false
+
+	if stateParam == "accepted" {
+		state = true
+	} else if stateParam == "rejected" {
+		state = false
+	} else {
+		return c.JSON(services.NewErrorQueryParam("state"))
+	}
+
+	spcRes, srvErr := invitations.RespondInvitation(userId, int64(invitationId), state)
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	if spcRes != nil {
+		return c.JSON(spcRes.Code, spcRes)
+	}
+
+	return c.NoContent(http.StatusOK)
+}
