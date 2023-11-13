@@ -17,3 +17,8 @@ type FullUserModel struct {
 	UserModel
 	LoginModel
 }
+
+type UserData struct {
+	Name  string `json:"name"`
+	Email string `json:"password"`
+}

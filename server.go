@@ -16,6 +16,7 @@ func main() {
 	e.GET("/groups/owner", controllers.FetchGroupsByOwner)
 	e.GET("/groups/member", controllers.FetchGroupsByMember)
 	e.POST("/groups/invite/:groupId", controllers.SendInvitations)
+	e.GET("/groups/members/:groupId", controllers.SearchMembersByGroup)
 	e.GET("/invitations", controllers.FetchInvitations)
 	e.GET("/invitations/group/:groupId", controllers.FetchInvitationsByGroup)
 	e.GET("/invitations/me", controllers.FetchUserInvitations)

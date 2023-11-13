@@ -116,3 +116,23 @@ func Invite(idSender int64, inv models.Invitation) (*services.SpecialResponse, *
 
 	return nil, nil
 }
+
+func FetchMembers(userId, groupId int64) ([]models.GroupMember, *services.Error) {
+	ownerId, err := groupsrepo.FetchOwner(groupId)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	if ownerId != userId {
+		return nil, services.ErrorForbidden
+	}
+
+	members, err := groupsrepo.FetchMembers(groupId)
+
+	if err != nil {
+		return nil, services.ErrorInternal
+	}
+
+	return members, nil
+}

@@ -20,6 +20,15 @@ const (
 	`
 	fetchOwnerSQL       = "SELECT ID_CREATOR FROM GROUPS WHERE ID = ? LIMIT 1"
 	fetchInvitationsSQL = "SELECT STATE FROM INVITATIONS WHERE ID_USER = ? AND ID_GROUP = ?"
+	fetchMembersSQL     = `
+	SELECT
+	U.NAME, L.EMAIL, G.NAME, G.DESCRIPTION
+	FROM USERS as U
+	JOIN LOGIN as L ON U.ID = L.ID
+	JOIN GROUP_MEMBERS as GM ON U.ID = GM.ID_USER
+	JOIN GROUPS as G ON GM.ID_GROUP = G.ID
+	WHERE GM.ID_GROUP = ?
+	`
 )
 
 var (
@@ -29,6 +38,7 @@ var (
 	fetchByMemberStmt    *sql.Stmt
 	fetchOwnerStmt       *sql.Stmt
 	fetchInvitationsStmt *sql.Stmt
+	fetchMembersStmt     *sql.Stmt
 )
 
 func init() {
@@ -60,6 +70,10 @@ func init() {
 
 	stmt, err = database.DB().Prepare(fetchInvitationsSQL)
 	fetchInvitationsStmt = stmt
+	check(err)
+
+	stmt, err = database.DB().Prepare(fetchMembersSQL)
+	fetchMembersStmt = stmt
 	check(err)
 }
 
@@ -194,4 +208,30 @@ func SendInvitation(idUser, idGroup int64) error {
 	}
 
 	return nil
+}
+
+func FetchMembers(idGroup int64) ([]models.GroupMember, error) {
+	r, err := fetchMembersStmt.Query(idGroup)
+
+	if err != nil {
+		general.PotencialInternalError(err)
+		return nil, err
+	}
+
+	members := make([]models.GroupMember, 0, 20)
+
+	for r.Next() {
+		member := models.GroupMember{}
+
+		err = r.Scan(&member.Name, &member.Email, &member.GroupName, &member.Description)
+
+		if err != nil {
+			general.PotencialInternalError(err)
+			return nil, err
+		}
+
+		members = append(members, member)
+	}
+
+	return members, nil
 }

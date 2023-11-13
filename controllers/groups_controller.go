@@ -140,3 +140,27 @@ func SendInvitations(c echo.Context) error {
 
 	return c.NoContent(http.StatusCreated)
 }
+
+func SearchMembersByGroup(c echo.Context) error {
+	userId, srvErr := getIdFromJWT(c)
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	groupIdParam := c.Param("groupId")
+
+	groupId, err := strconv.Atoi(groupIdParam)
+
+	if err != nil {
+		return c.JSON(services.ErrorPathParam.Code, services.ErrorPathParam)
+	}
+
+	members, srvErr := groups.FetchMembers(userId, int64(groupId))
+
+	if srvErr != nil {
+		return c.JSON(srvErr.Code, srvErr)
+	}
+
+	return c.JSON(http.StatusOK, members)
+}

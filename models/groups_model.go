@@ -18,3 +18,9 @@ type Invitation struct {
 	IdGroup int64    `json:"id"`
 	Emails  []string `json:"emails"`
 }
+
+type GroupMember struct {
+	UserData
+	GroupName   string `json:"group_name"`
+	Description string `json:"group_description"`
+}
