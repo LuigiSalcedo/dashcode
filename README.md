@@ -41,6 +41,3 @@ This is the list of endpoints of the server:
 | `/invitations/group/:groupId?[state=(accepted or rejected or any)]` | GET | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | sent invitations list from group with the **:groupId** id |
 | `/invitations/me` | GET | no content | Authorization (Header): JWT (without "Bearer" prefix) | JSON | list of pending user invitations |
 | `/invitations/respond/:invitationId?state=(accepted or rejected)` | POST | no content | Authorization (Header): JWT (without "Bearer prefix") | JSON | no content if nothing went wrong |
-
-## TODO
-- Search groups where the user is a members
